@@ -8,19 +8,19 @@ This document outlines the development plan for the "Crash Course" interactive c
 
 This phase covers the initial setup of the development environment, project structure, and version control.
 
-- [ ] Initialize a new Git repository.
-- [ ] Create a monorepo structure with `frontend` and `backend` directories.
-- [ ] **Backend Setup**:
-    - [ ] Set up a Python virtual environment inside the `backend` directory.
-    - [ ] Initialize a `pip` project with a `requirements.txt` file.
-    - [ ] Add initial dependencies: `fastapi`, `uvicorn`, `numpy`.
-- [ ] **Frontend Setup**:
-    - [ ] Initialize a new React application using Vite inside the `frontend` directory.
-    - [ ] Install and configure Tailwind CSS for the React project.
-- [ ] **Fonts & Assets**:
-    - [ ] Add 'Tektur' and 'Lexend' fonts from Google Fonts to the project.
-    - [ ] Configure fonts in the Tailwind CSS configuration.
-- [ ] Define a comprehensive `.gitignore` file for both frontend and backend (e.g., `node_modules`, `__pycache__`, `venv`, `dist`).
+- [x] Initialize a new Git repository.
+- [x] Create a monorepo structure with `frontend` and `backend` directories.
+- [x] **Backend Setup**:
+    - [x] Set up a Python virtual environment inside the `backend` directory.
+    - [x] Initialize a `pip` project with a `requirements.txt` file.
+    - [x] Add initial dependencies: `fastapi`, `uvicorn`, `numpy`.
+- [x] **Frontend Setup**:
+    - [x] Initialize a new React application using Vite inside the `frontend` directory.
+    - [x] Install and configure Tailwind CSS for the React project.
+- [x] **Fonts & Assets**:
+    - [x] Add 'Tektur' and 'Lexend' fonts from Google Fonts to the project.
+    - [x] Configure fonts in the Tailwind CSS configuration.
+- [x] Define a comprehensive `.gitignore` file for both frontend and backend (e.g., `node_modules`, `__pycache__`, `venv`, `dist`).
 
 ---
 
