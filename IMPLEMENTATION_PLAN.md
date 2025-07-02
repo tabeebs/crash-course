@@ -47,18 +47,18 @@ This phase focuses on building the core physics logic and exposing it through a 
 
 This phase involves building the static, visually appealing landing page.
 
-- [ ] **Component Structure**:
-    - [ ] Create a `LandingPage` component that will live at the `/` route.
-    - [ ] Create a `Footer` component.
-- [ ] **Styling (Tailwind CSS)**:
-    - [ ] Implement the black background and futuristic theme.
-    - [ ] Style the "CRASH COURSE" title and subtitle using the Tektur font.
-    - [ ] Create the "Try Now" button with its specific black background, red (`#e12726`) outline, and text style.
-    - [ ] Implement the smooth hover effect for the button, transitioning its background to red.
-    - [ ] Style the footer with the "2025 © Shafquat Tabeeb" text using the Lexend font and red (`#ff0000`) color.
-- [ ] **Routing & Transitions**:
-    - [ ] Set up React Router for navigation between the landing page (`/`) and the simulator (`/simulator`).
-    - [ ] Plan and implement the cyberpunk-themed glitch transition upon clicking the "Try Now" button.
+- [x] **Component Structure**:
+    - [x] Create a `LandingPage` component that will live at the `/` route.
+    - [x] Create a `Footer` component.
+- [x] **Styling (Tailwind CSS)**:
+    - [x] Implement the black background and futuristic theme.
+    - [x] Style the "CRASH COURSE" title and subtitle using the Tektur font.
+    - [x] Create the "Try Now" button with its specific black background, red (`#e12726`) outline, and text style.
+    - [x] Implement the smooth hover effect for the button, transitioning its background to red.
+    - [x] Style the footer with the "2025 © Shafquat Tabeeb" text using the Lexend font and red (`#ff0000`) color.
+- [x] **Routing & Transitions**:
+    - [x] Set up React Router for navigation between the landing page (`/`) and the simulator (`/simulator`).
+    - [x] Plan and implement the cyberpunk-themed glitch transition upon clicking the "Try Now" button.
 
 ---
 
