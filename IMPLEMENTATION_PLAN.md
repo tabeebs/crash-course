@@ -66,21 +66,21 @@ This phase involves building the static, visually appealing landing page.
 
 This phase focuses on setting up the interactive canvas where the simulation runs.
 
-- [ ] **Simulator Page Structure**:
-    - [ ] Create a `SimulatorPage` component.
-    - [ ] Design the responsive two-panel layout (canvas left/top, controls right/bottom) using Tailwind CSS.
-- [ ] **Canvas Component**:
-    - [ ] Create a `Canvas` component using the HTML5 `<canvas>` element.
-    - [ ] Create a custom hook (e.g., `useCanvasAnimation`) to manage the `requestAnimationFrame` loop for 60fps animation.
-- [ ] **Rendering Logic**:
-    - [ ] Implement a function to draw the background grid on the canvas.
-    - [ ] Create a `Particle` class or object factory to manage particle state (position, velocity, mass, radius).
-    - [ ] Implement a function to draw particles, ensuring their radius is proportional to their mass.
-    - [ ] Implement drag-and-drop functionality for users to set the initial position of particles on the canvas.
-- [ ] **Animation Loop**:
-    - [ ] On "Play", the loop should update particle positions based on velocity.
-    - [ ] Implement 1D collision detection (when particle positions overlap).
-    - [ ] After a collision is detected, the animation should use the new velocities calculated by the physics engine.
+- [x] **Simulator Page Structure**:
+    - [x] Create a `SimulatorPage` component.
+    - [x] Design the responsive two-panel layout (canvas left/top, controls right/bottom) using Tailwind CSS.
+- [x] **Canvas Component**:
+    - [x] Create a `Canvas` component using the HTML5 `<canvas>` element.
+    - [x] Create a custom hook (e.g., `useCanvasAnimation`) to manage the `requestAnimationFrame` loop for 60fps animation.
+- [x] **Rendering Logic**:
+    - [x] Implement a function to draw the background grid on the canvas.
+    - [x] Create a `Particle` class or object factory to manage particle state (position, velocity, mass, radius).
+    - [x] Implement a function to draw particles, ensuring their radius is proportional to their mass.
+    - [x] Implement drag-and-drop functionality for users to set the initial position of particles on the canvas.
+- [x] **Animation Loop**:
+    - [x] On "Play", the loop should update particle positions based on velocity.
+    - [x] Implement 1D collision detection (when particle positions overlap).
+    - [x] After a collision is detected, the animation should use the new velocities calculated by the physics engine.
 
 ---
 
