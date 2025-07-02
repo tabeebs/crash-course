@@ -28,18 +28,18 @@ This phase covers the initial setup of the development environment, project stru
 
 This phase focuses on building the core physics logic and exposing it through a web API.
 
-- [ ] **Collision Engine Module (`collision_engine.py`)**:
-    - [ ] Create a Python module to encapsulate all physics calculations. Note: The simulation will be 1D (horizontal motion) as per the provided formulas, visualized on a 2D canvas.
-    - [ ] Implement a function to calculate post-collision velocities based on the general restitution formula.
-    - [ ] Add functions to calculate momentum (`p = mv`) and kinetic energy (`KE = 0.5 * mv²`).
-    - [ ] Structure the engine to accept particle masses, initial velocities, and the coefficient of restitution (`e`) as input.
-    - [ ] The engine should return a structured object containing initial and final states for both particles (velocity, momentum, KE) and a summary of total momentum and KE change.
-- [ ] **FastAPI Server (`main.py`)**:
-    - [ ] Set up a basic FastAPI application.
-    - [ ] Define Pydantic models for the `/simulate` request body and response structure.
-    - [ ] Create the `/simulate` POST endpoint to receive particle properties, call the collision engine, and return the full results.
-    - [ ] Create the `/presets` GET endpoint to return a list of pre-defined simulation scenarios (e.g., "Equal Mass – Head-On").
-    - [ ] Configure CORS (Cross-Origin Resource Sharing) middleware to allow requests from the frontend.
+- [x] **Collision Engine Module (`collision_engine.py`)**:
+    - [x] Create a Python module to encapsulate all physics calculations. Note: The simulation will be 1D (horizontal motion) as per the provided formulas, visualized on a 2D canvas.
+    - [x] Implement a function to calculate post-collision velocities based on the general restitution formula.
+    - [x] Add functions to calculate momentum (`p = mv`) and kinetic energy (`KE = 0.5 * mv²`).
+    - [x] Structure the engine to accept particle masses, initial velocities, and the coefficient of restitution (`e`) as input.
+    - [x] The engine should return a structured object containing initial and final states for both particles (velocity, momentum, KE) and a summary of total momentum and KE change.
+- [x] **FastAPI Server (`main.py`)**:
+    - [x] Set up a basic FastAPI application.
+    - [x] Define Pydantic models for the `/simulate` request body and response structure.
+    - [x] Create the `/simulate` POST endpoint to receive particle properties, call the collision engine, and return the full results.
+    - [x] Create the `/presets` GET endpoint to return a list of pre-defined simulation scenarios (e.g., "Equal Mass – Head-On").
+    - [x] Configure CORS (Cross-Origin Resource Sharing) middleware to allow requests from the frontend.
 
 ---
 
