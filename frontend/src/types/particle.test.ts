@@ -19,7 +19,7 @@ const mockContext = {
   moveTo: vi.fn(),
   lineTo: vi.fn(),
   closePath: vi.fn(),
-} as any;
+} as unknown as CanvasRenderingContext2D;
 
 describe('Particle', () => {
   let particle: Particle;
@@ -57,7 +57,6 @@ describe('Particle', () => {
 
   describe('updatePosition', () => {
     it('updates position based on velocity and time', () => {
-      const initialX = particle.x;
       particle.updatePosition(1000); // 1 second
       
       // Expected: x = x + v * t * scale = 100 + 5 * 1 * 100 = 600
@@ -66,7 +65,6 @@ describe('Particle', () => {
 
     it('handles negative velocity', () => {
       particle.velocity = -3;
-      const initialX = particle.x;
       particle.updatePosition(500); // 0.5 seconds
       
       // Expected: x = 100 + (-3) * 0.5 * 100 = 100 - 150 = -50

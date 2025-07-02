@@ -88,19 +88,19 @@ This phase focuses on setting up the interactive canvas where the simulation run
 
 This phase involves building the interactive UI elements that allow the user to control the simulation.
 
-- [ ] **Control Panel Components**:
-    - [ ] Create a `ControlsPanel` component.
-    - [ ] Create reusable `Slider` and `Tab` or `Accordion` components.
-    - [ ] Create a `ParticleControls` component for each particle, containing sliders for Mass and Initial Velocity.
-    - [ ] Create a `GlobalControls` component for the Coefficient of Restitution slider and Collision Type selector (Elastic/Inelastic).
-- [ ] **Simulation Controls**:
-    - [ ] Create a `SimulationControls` component for the Play, Pause, and Reset buttons.
-    - [ ] Ensure the Play button smoothly animates into a Pause button and vice-versa.
-    - [ ] Implement the functionality for all three buttons (start, stop, and reset simulation).
-- [ ] **Data Read-out Panel**:
-    - [ ] Create a `DataPanel` component.
-    - [ ] Display "Before" and "After" collision data (velocities, momentum, KE) for each particle.
-    - [ ] Include a summary section for total momentum and the change in total kinetic energy.
+- [x] **Control Panel Components**:
+    - [x] Create a `ControlsPanel` component.
+    - [x] Create reusable `Slider` and `Tab` or `Accordion` components.
+    - [x] Create a `ParticleControls` component for each particle, containing sliders for Mass and Initial Velocity.
+    - [x] Create a `GlobalControls` component for the Coefficient of Restitution slider and Collision Type selector (Elastic/Inelastic).
+- [x] **Simulation Controls**:
+    - [x] Create a `SimulationControls` component for the Play, Pause, and Reset buttons.
+    - [x] Ensure the Play button smoothly animates into a Pause button and vice-versa.
+    - [x] Implement the functionality for all three buttons (start, stop, and reset simulation).
+- [x] **Data Read-out Panel**:
+    - [x] Create a `DataPanel` component.
+    - [x] Display "Before" and "After" collision data (velocities, momentum, KE) for each particle.
+    - [x] Include a summary section for total momentum and the change in total kinetic energy.
 
 ---
 

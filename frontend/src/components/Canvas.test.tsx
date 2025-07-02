@@ -19,7 +19,7 @@ vi.mock('../hooks/useCanvasAnimation', () => ({
 
 // Mock HTMLCanvasElement methods
 beforeEach(() => {
-  HTMLCanvasElement.prototype.getContext = vi.fn(() => ({
+  HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue({
     fillStyle: '',
     fillRect: vi.fn(),
     strokeStyle: '',
@@ -33,7 +33,7 @@ beforeEach(() => {
     save: vi.fn(),
     restore: vi.fn(),
     closePath: vi.fn(),
-  })) as any;
+  });
 });
 
 describe('Canvas', () => {

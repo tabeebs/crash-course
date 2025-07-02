@@ -19,7 +19,7 @@ const Canvas: React.FC<CanvasProps> = ({ width = 800, height = 400 }) => {
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   
   // Custom hook for animation loop
-  const { startAnimation, stopAnimation, resetAnimation, isPlaying } = 
+  const { isPlaying } = 
     useCanvasAnimation(canvasRef, particles, setParticles);
 
   // Initialize particles
