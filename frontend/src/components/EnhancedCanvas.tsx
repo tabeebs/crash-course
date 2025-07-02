@@ -1,294 +1,385 @@
 /**
- * Enhanced Canvas component with integrated simulation state and collision handling.
+ * Enhanced Canvas component with integrated state management and performance optimizations.
  */
 
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useCallback, useMemo } from 'react';
 import { Particle } from '../types/particle';
-import type { ParticleState, SimulationStatus } from '../hooks/useSimulationState';
-import type { SimulationResponse } from '../services/api';
+import { SimulationStatus } from '../types/simulation';
 
 interface EnhancedCanvasProps {
-  width?: number;
-  height?: number;
-  particle1: ParticleState;
-  particle2: ParticleState;
+  particles: Particle[];
+  onParticleUpdate: (particles: Particle[]) => void;
   status: SimulationStatus;
-  collisionData: SimulationResponse | null;
-  onParticle1PositionChange: (x: number, y: number) => void;
-  onParticle2PositionChange: (x: number, y: number) => void;
+  animationData?: any[];
+  isAnimating: boolean;
+  canvasWidth?: number;
+  canvasHeight?: number;
+  className?: string;
 }
 
 const EnhancedCanvas: React.FC<EnhancedCanvasProps> = ({
-  width = 800,
-  height = 400,
-  particle1,
-  particle2,
+  particles,
+  onParticleUpdate,
   status,
-  collisionData,
-  onParticle1PositionChange,
-  onParticle2PositionChange,
+  animationData = [],
+  isAnimating,
+  canvasWidth = 800,
+  canvasHeight = 600,
+  className = ''
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number | null>(null);
-  const [particles, setParticles] = useState<Particle[]>([]);
-  const [draggedParticle, setDraggedParticle] = useState<Particle | null>(null);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const [collisionDetected, setCollisionDetected] = useState(false);
-  const [animationStartTime, setAnimationStartTime] = useState<number>(0);
+  const animationRef = useRef<number>();
+  const animationIndexRef = useRef(0);
+  const lastRenderTimeRef = useRef(0);
+  const isDraggingRef = useRef(false);
+  const selectedParticleRef = useRef<number | null>(null);
+  const mousePositionRef = useRef({ x: 0, y: 0 });
 
-  // Initialize particles from state
-  useEffect(() => {
-    const p1 = new Particle(
-      particle1.id,
-      particle1.x,
-      particle1.y,
-      particle1.velocity,
-      particle1.mass,
-      particle1.color
-    );
-    
-    const p2 = new Particle(
-      particle2.id,
-      particle2.x,
-      particle2.y,
-      particle2.velocity,
-      particle2.mass,
-      particle2.color
-    );
+  // Performance: Memoize particle colors to avoid recalculation
+  const particleColors = useMemo(() => ({
+    default: '#e12726',
+    hover: '#ff4444',
+    selected: '#ffffff',
+    trail: 'rgba(225, 39, 38, 0.3)',
+    animation: '#ff6666'
+  }), []);
 
-    setParticles([p1, p2]);
-  }, [particle1, particle2]);
+  // Performance: Memoize canvas dimensions
+  const canvasDimensions = useMemo(() => ({
+    width: canvasWidth,
+    height: canvasHeight
+  }), [canvasWidth, canvasHeight]);
 
-  // Animation loop
-  const animate = useCallback((currentTime: number) => {
-    if (!canvasRef.current) return;
+  // Performance: Throttled render function to prevent excessive redraws
+  const throttledRender = useCallback((timestamp: number) => {
+    if (timestamp - lastRenderTimeRef.current < 16) { // ~60fps
+      return;
+    }
+    lastRenderTimeRef.current = timestamp;
 
-    const ctx = canvasRef.current.getContext('2d');
-    if (!ctx) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext('2d');
+    if (!canvas || !ctx) return;
 
-    // Clear canvas
-    ctx.fillStyle = '#000000';
-    ctx.fillRect(0, 0, width, height);
-    
-    // Draw grid
-    drawGrid(ctx, width, height);
+    // Clear canvas with performance optimization
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Update particles during animation
-    if (status === 'playing') {
-      const deltaTime = currentTime - animationStartTime;
-      const timeScale = 0.001; // Scale factor for realistic motion
-
-      setParticles(prevParticles => {
-        const updatedParticles = [...prevParticles];
-        
-        // Update positions
-        updatedParticles.forEach(particle => {
-          particle.updatePosition(deltaTime * timeScale);
-        });
-
-        // Check for collision
-        const p1 = updatedParticles[0];
-        const p2 = updatedParticles[1];
-        
-        if (!collisionDetected && p1.isCollidingWith(p2)) {
-          setCollisionDetected(true);
-          
-          // Apply post-collision velocities if available
-          if (collisionData) {
-            p1.velocity = collisionData.particle1After.velocity;
-            p2.velocity = collisionData.particle2After.velocity;
-          }
-        }
-
-        return updatedParticles;
-      });
+    // Draw background grid for better visual reference
+    if (status === 'idle' || status === 'paused') {
+      drawBackgroundGrid(ctx, canvas.width, canvas.height);
     }
 
-    // Draw particles
-    particles.forEach(particle => {
-      particle.draw(ctx);
+    // Draw particles based on status
+    if (isAnimating && animationData.length > 0) {
+      drawAnimationFrame(ctx);
+    } else {
+      drawStaticParticles(ctx);
+    }
+
+    // Draw UI overlays
+    drawStatusOverlay(ctx, canvas.width, canvas.height);
+  }, [particles, animationData, isAnimating, status, particleColors]);
+
+  const drawBackgroundGrid = useCallback((ctx: CanvasRenderingContext2D, width: number, height: number) => {
+    ctx.save();
+    ctx.strokeStyle = 'rgba(225, 39, 38, 0.1)';
+    ctx.lineWidth = 0.5;
+    
+    const gridSize = 50;
+    
+    // Vertical lines
+    for (let x = 0; x <= width; x += gridSize) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, height);
+      ctx.stroke();
+    }
+    
+    // Horizontal lines
+    for (let y = 0; y <= height; y += gridSize) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(width, y);
+      ctx.stroke();
+    }
+    
+    ctx.restore();
+  }, []);
+
+  const drawAnimationFrame = useCallback((ctx: CanvasRenderingContext2D) => {
+    if (animationIndexRef.current >= animationData.length) {
+      animationIndexRef.current = 0;
+      return;
+    }
+
+    const frameData = animationData[animationIndexRef.current];
+    if (!frameData?.particles) return;
+
+    frameData.particles.forEach((particle: Particle, index: number) => {
+      drawParticleWithTrail(ctx, particle, index, true);
     });
 
-    // Continue animation if playing
-    if (status === 'playing') {
-      animationRef.current = requestAnimationFrame(animate);
-    }
-  }, [status, particles, width, height, collisionDetected, collisionData, animationStartTime]);
+    animationIndexRef.current++;
+  }, [animationData, particleColors]);
 
-  // Start/stop animation based on status
-  useEffect(() => {
-    if (status === 'playing' && !animationRef.current) {
-      setAnimationStartTime(performance.now());
-      animationRef.current = requestAnimationFrame(animate);
-    } else if (status !== 'playing' && animationRef.current !== null) {
-      cancelAnimationFrame(animationRef.current);
-      animationRef.current = null;
+  const drawStaticParticles = useCallback((ctx: CanvasRenderingContext2D) => {
+    particles.forEach((particle, index) => {
+      const isSelected = selectedParticleRef.current === index;
+      const isHovered = isParticleHovered(particle, mousePositionRef.current);
+      
+      drawParticleWithTrail(ctx, particle, index, false, isSelected, isHovered);
+    });
+  }, [particles, particleColors]);
+
+  const drawParticleWithTrail = useCallback((
+    ctx: CanvasRenderingContext2D,
+    particle: Particle,
+    index: number,
+    isAnimating: boolean,
+    isSelected = false,
+    isHovered = false
+  ) => {
+    ctx.save();
+
+    // Draw particle trail for animation
+    if (isAnimating && particle.vx !== undefined && particle.vy !== undefined) {
+      const trailLength = 20;
+      const speed = Math.sqrt(particle.vx ** 2 + particle.vy ** 2);
+      
+      if (speed > 0.1) {
+        ctx.strokeStyle = particleColors.trail;
+        ctx.lineWidth = particle.radius * 0.3;
+        ctx.beginPath();
+        ctx.moveTo(
+          particle.x - (particle.vx / speed) * trailLength,
+          particle.y - (particle.vy / speed) * trailLength
+        );
+        ctx.lineTo(particle.x, particle.y);
+        ctx.stroke();
+      }
     }
+
+    // Draw particle with enhanced visuals
+    const radius = isSelected ? particle.radius * 1.2 : particle.radius;
+    const color = isSelected 
+      ? particleColors.selected 
+      : isHovered 
+        ? particleColors.hover 
+        : isAnimating 
+          ? particleColors.animation 
+          : particleColors.default;
+
+    // Outer glow for selected/hovered particles
+    if (isSelected || isHovered) {
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 10;
+    }
+
+    // Main particle circle
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(particle.x, particle.y, radius, 0, 2 * Math.PI);
+    ctx.fill();
+
+    // Inner highlight
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = `rgba(255, 255, 255, ${isSelected ? 0.4 : 0.2})`;
+    ctx.beginPath();
+    ctx.arc(
+      particle.x - radius * 0.3,
+      particle.y - radius * 0.3,
+      radius * 0.3,
+      0,
+      2 * Math.PI
+    );
+    ctx.fill();
+
+    // Particle label
+    if (isSelected || isHovered || status === 'idle') {
+      ctx.fillStyle = 'white';
+      ctx.font = '12px Tektur, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(
+        `P${index + 1}`,
+        particle.x,
+        particle.y - radius - 8
+      );
+      
+      // Show velocity if available
+      if (particle.vx !== undefined && particle.vy !== undefined) {
+        const speed = Math.sqrt(particle.vx ** 2 + particle.vy ** 2);
+        ctx.font = '10px Tektur, monospace';
+        ctx.fillText(
+          `v: ${speed.toFixed(1)}`,
+          particle.x,
+          particle.y + radius + 15
+        );
+      }
+    }
+
+    ctx.restore();
+  }, [particleColors, status]);
+
+  const drawStatusOverlay = useCallback((ctx: CanvasRenderingContext2D, width: number, height: number) => {
+    ctx.save();
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+    ctx.fillRect(10, height - 60, 200, 50);
+    
+    ctx.fillStyle = 'white';
+    ctx.font = '14px Tektur, monospace';
+    ctx.textAlign = 'left';
+    
+    const statusText = status.charAt(0).toUpperCase() + status.slice(1);
+    ctx.fillText(`Status: ${statusText}`, 20, height - 35);
+    
+    if (isAnimating) {
+      const progress = animationData.length > 0 
+        ? (animationIndexRef.current / animationData.length * 100).toFixed(1)
+        : '0';
+      ctx.fillText(`Progress: ${progress}%`, 20, height - 15);
+    } else {
+      ctx.fillText(`Particles: ${particles.length}`, 20, height - 15);
+    }
+    
+    ctx.restore();
+  }, [status, isAnimating, animationData.length, particles.length]);
+
+  const isParticleHovered = useCallback((particle: Particle, mousePos: { x: number; y: number }) => {
+    const distance = Math.sqrt(
+      (particle.x - mousePos.x) ** 2 + (particle.y - mousePos.y) ** 2
+    );
+    return distance <= particle.radius + 5; // 5px tolerance
+  }, []);
+
+  const getParticleAtPosition = useCallback((x: number, y: number): number | null => {
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const particle = particles[i];
+      const distance = Math.sqrt((particle.x - x) ** 2 + (particle.y - y) ** 2);
+      if (distance <= particle.radius) {
+        return i;
+      }
+    }
+    return null;
+  }, [particles]);
+
+  // Enhanced mouse interaction handlers
+  const handleMouseDown = useCallback((event: React.MouseEvent<HTMLCanvasElement>) => {
+    if (status !== 'idle') return;
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    const particleIndex = getParticleAtPosition(x, y);
+    if (particleIndex !== null) {
+      isDraggingRef.current = true;
+      selectedParticleRef.current = particleIndex;
+      mousePositionRef.current = { x, y };
+    }
+  }, [status, getParticleAtPosition]);
+
+  const handleMouseMove = useCallback((event: React.MouseEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    
+    mousePositionRef.current = { x, y };
+
+    if (isDraggingRef.current && selectedParticleRef.current !== null) {
+      const newParticles = [...particles];
+      newParticles[selectedParticleRef.current] = {
+        ...newParticles[selectedParticleRef.current],
+        x: Math.max(newParticles[selectedParticleRef.current].radius, 
+             Math.min(canvas.width - newParticles[selectedParticleRef.current].radius, x)),
+        y: Math.max(newParticles[selectedParticleRef.current].radius, 
+             Math.min(canvas.height - newParticles[selectedParticleRef.current].radius, y))
+      };
+      onParticleUpdate(newParticles);
+    }
+
+    // Update cursor style
+    const hoveredParticle = getParticleAtPosition(x, y);
+    canvas.style.cursor = hoveredParticle !== null ? 'pointer' : 'default';
+  }, [particles, onParticleUpdate, getParticleAtPosition]);
+
+  const handleMouseUp = useCallback(() => {
+    isDraggingRef.current = false;
+    selectedParticleRef.current = null;
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    isDraggingRef.current = false;
+    selectedParticleRef.current = null;
+    mousePositionRef.current = { x: -1, y: -1 };
+  }, []);
+
+  // Animation loop with performance optimization
+  useEffect(() => {
+    if (!isAnimating) {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+        animationRef.current = undefined;
+      }
+      return;
+    }
+
+    const animate = (timestamp: number) => {
+      throttledRender(timestamp);
+      animationRef.current = requestAnimationFrame(animate);
+    };
+
+    animationRef.current = requestAnimationFrame(animate);
 
     return () => {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [status, animate]);
+  }, [isAnimating, throttledRender]);
 
-  // Reset collision detection when simulation resets
+  // Static render for non-animated states
   useEffect(() => {
-    if (status === 'idle') {
-      setCollisionDetected(false);
-      setAnimationStartTime(0);
-    }
-  }, [status]);
-
-  // Handle mouse down for drag start
-  const handleMouseDown = useCallback((event: React.MouseEvent<HTMLCanvasElement>) => {
-    if (status === 'playing') return; // Don't allow dragging during animation
+    if (isAnimating) return;
     
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    const ctx = canvas?.getContext('2d');
+    if (!canvas || !ctx) return;
 
-    const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
+    requestAnimationFrame(() => throttledRender(performance.now()));
+  }, [particles, status, isAnimating, throttledRender]);
 
-    // Find particle under mouse
-    const particle = particles.find(p => p.containsPoint(x, y));
-    if (particle) {
-      setDraggedParticle(particle);
-      setDragOffset({
-        x: x - particle.x,
-        y: y - particle.y,
-      });
-    }
-  }, [particles, status]);
-
-  // Handle mouse move for dragging
-  const handleMouseMove = useCallback((event: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!draggedParticle) return;
-
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-
-    const newX = x - dragOffset.x;
-    const newY = y - dragOffset.y;
-
-    // Update particle position locally
-    setParticles(prev => prev.map(p => {
-      if (p.id === draggedParticle.id) {
-        return new Particle(p.id, newX, newY, p.velocity, p.mass, p.color);
-      }
-      return p;
-    }));
-
-    // Notify parent of position change
-    if (draggedParticle.id === particle1.id) {
-      onParticle1PositionChange(newX, newY);
-    } else if (draggedParticle.id === particle2.id) {
-      onParticle2PositionChange(newX, newY);
-    }
-  }, [draggedParticle, dragOffset, particle1.id, particle2.id, onParticle1PositionChange, onParticle2PositionChange]);
-
-  // Handle mouse up for drag end
-  const handleMouseUp = useCallback(() => {
-    setDraggedParticle(null);
-    setDragOffset({ x: 0, y: 0 });
-  }, []);
-
-  // Draw canvas
+  // Reset animation index when animation data changes
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    // Set canvas size
-    canvas.width = width;
-    canvas.height = height;
-
-    // Clear and redraw
-    ctx.fillStyle = '#000000';
-    ctx.fillRect(0, 0, width, height);
-    
-    // Draw grid
-    drawGrid(ctx, width, height);
-    
-    // Draw particles
-    particles.forEach(particle => {
-      particle.draw(ctx);
-    });
-  }, [width, height, particles]);
-
-  const getStatusMessage = () => {
-    switch (status) {
-      case 'idle':
-        return 'Drag particles to position • Click Play to start simulation';
-      case 'playing':
-        return 'Simulation running...';
-      case 'paused':
-        return 'Simulation paused • Click Play to continue';
-      case 'completed':
-        return 'Collision complete! Check the data panel for results';
-      case 'error':
-        return 'Error occurred • Check connection and try again';
-      default:
-        return '';
-    }
-  };
+    animationIndexRef.current = 0;
+  }, [animationData]);
 
   return (
-    <div className="flex flex-col items-center h-full">
-      <div className="flex-1 flex items-center justify-center">
-        <canvas
-          ref={canvasRef}
-          className="border border-gray-700 bg-black cursor-crosshair"
-          style={{ maxWidth: '100%', maxHeight: '100%' }}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
-        />
-      </div>
-      <div className={`mt-4 text-sm font-lexend text-center transition-colors duration-300 ${
-        status === 'error' ? 'text-crash-red' :
-        status === 'completed' ? 'text-green-400' :
-        status === 'playing' ? 'text-blue-400' :
-        'text-gray-400'
-      }`}>
-        {getStatusMessage()}
+    <div className={`relative border border-crash-red rounded-lg overflow-hidden ${className}`}>
+      <canvas
+        ref={canvasRef}
+        width={canvasDimensions.width}
+        height={canvasDimensions.height}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
+        className="bg-black cursor-default transition-all duration-200"
+        aria-label="Interactive particle simulation canvas"
+      />
+      
+      {/* Accessibility overlay */}
+      <div className="sr-only">
+        Canvas showing {particles.length} particles in {status} state
+        {isAnimating && `, animation ${((animationIndexRef.current / Math.max(animationData.length, 1)) * 100).toFixed(1)}% complete`}
       </div>
     </div>
   );
-};
-
-/**
- * Draws a background grid on the canvas.
- */
-const drawGrid = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-  const gridSize = 40;
-  
-  ctx.strokeStyle = '#333333';
-  ctx.lineWidth = 1;
-  
-  // Vertical lines
-  for (let x = 0; x <= width; x += gridSize) {
-    ctx.beginPath();
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, height);
-    ctx.stroke();
-  }
-  
-  // Horizontal lines
-  for (let y = 0; y <= height; y += gridSize) {
-    ctx.beginPath();
-    ctx.moveTo(0, y);
-    ctx.lineTo(width, y);
-    ctx.stroke();
-  }
 };
 
 export default EnhancedCanvas; 
