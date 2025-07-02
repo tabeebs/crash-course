@@ -6,7 +6,6 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import LandingPage from './components/LandingPage';
 import SimulatorPage from './components/SimulatorPage';
 import ErrorBoundary from './components/ErrorBoundary';
-import './App.css';
 
 function App() {
   return (
