@@ -7,6 +7,7 @@ import ParticleControls from './ParticleControls';
 import GlobalControls from './GlobalControls';
 import SimulationControls from './SimulationControls';
 import DataPanel from './DataPanel';
+import type { SimulationStatus } from '../hooks/useSimulationState';
 
 interface Particle {
   id: string;
@@ -43,7 +44,7 @@ interface ControlsPanelProps {
   onCollisionTypeChange: (type: 'elastic' | 'inelastic' | 'custom') => void;
   
   // Simulation controls
-  simulationStatus: 'idle' | 'playing' | 'paused' | 'completed';
+  simulationStatus: SimulationStatus;
   onPlay: () => void;
   onPause: () => void;
   onReset: () => void;

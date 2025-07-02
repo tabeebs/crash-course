@@ -3,9 +3,10 @@
  */
 
 import React from 'react';
+import type { SimulationStatus } from '../hooks/useSimulationState';
 
 interface SimulationControlsProps {
-  status: 'idle' | 'playing' | 'paused' | 'completed';
+  status: SimulationStatus;
   onPlay: () => void;
   onPause: () => void;
   onReset: () => void;
@@ -18,7 +19,7 @@ const SimulationControls: React.FC<SimulationControlsProps> = ({
   onReset,
 }) => {
   const isPlaying = status === 'playing';
-  const canPlay = status === 'idle' || status === 'paused' || status === 'completed';
+  const canPlay = status === 'idle' || status === 'paused' || status === 'completed' || status === 'error';
   const canPause = status === 'playing';
   const canReset = status !== 'idle';
 
@@ -114,12 +115,14 @@ const SimulationControls: React.FC<SimulationControlsProps> = ({
           status === 'playing' ? 'text-green-400' :
           status === 'paused' ? 'text-yellow-400' :
           status === 'completed' ? 'text-blue-400' :
+          status === 'error' ? 'text-crash-red' :
           'text-gray-400'
         }`}>
           {status === 'idle' && 'Ready'}
           {status === 'playing' && 'Running'}
           {status === 'paused' && 'Paused'}
           {status === 'completed' && 'Complete'}
+          {status === 'error' && 'Error'}
         </div>
       </div>
     </div>

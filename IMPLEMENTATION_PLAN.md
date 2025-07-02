@@ -104,23 +104,23 @@ This phase involves building the interactive UI elements that allow the user to 
 
 ---
 
-### Phase 5: Frontend - State Management & API Integration
+### Phase 5: Frontend - State Management & API Integration ✅
 
 This phase connects the UI, canvas, and backend into a cohesive application.
 
-- [ ] **State Management (React Hooks)**:
-    - [ ] Use `useState` and `useReducer` to manage the state of the entire simulation (particle properties, simulation status like 'idle', 'playing', 'paused').
-    - [ ] Ensure that adjusting a UI control (e.g., a mass slider) updates the global state, which in turn updates the particle's appearance on the canvas in real-time.
-- [ ] **API Integration**:
-    - [ ] When the user clicks "Play", send the current particle and simulation settings to the `/simulate` backend endpoint.
-    - [ ] Receive the calculated "before" and "after" data from the API.
-    - [ ] Store this data in the frontend state.
-    - [ ] Use the returned post-collision velocities to update the animation after the impact.
-    - [ ] Fetch and display presets from the `/presets` endpoint.
-- [ ] **Data Flow**:
-    - [ ] On "Play" -> `API Call` -> `Update State with API response` -> `Start Animation`.
-    - [ ] `Animation Loop` -> `Detect Collision` -> `Switch to post-collision velocities from state`.
-    - [ ] `Update DataPanel` with the full results from the state.
+- [x] **State Management (React Hooks)**:
+    - [x] Use `useState` and `useReducer` to manage the state of the entire simulation (particle properties, simulation status like 'idle', 'playing', 'paused').
+    - [x] Ensure that adjusting a UI control (e.g., a mass slider) updates the global state, which in turn updates the particle's appearance on the canvas in real-time.
+- [x] **API Integration**:
+    - [x] When the user clicks "Play", send the current particle and simulation settings to the `/simulate` backend endpoint.
+    - [x] Receive the calculated "before" and "after" data from the API.
+    - [x] Store this data in the frontend state.
+    - [x] Use the returned post-collision velocities to update the animation after the impact.
+    - [x] Fetch and display presets from the `/presets` endpoint.
+- [x] **Data Flow**:
+    - [x] On "Play" -> `API Call` -> `Update State with API response` -> `Start Animation`.
+    - [x] `Animation Loop` -> `Detect Collision` -> `Switch to post-collision velocities from state`.
+    - [x] `Update DataPanel` with the full results from the state.
 
 ---
 
